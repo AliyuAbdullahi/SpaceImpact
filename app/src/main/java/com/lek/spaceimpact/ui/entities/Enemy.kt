@@ -29,6 +29,6 @@ data class Enemy(val xPos: Float, val yPos: Float, val color: Color = EnemyColor
     override val resource: Int = R.drawable.enemy
 
     companion object {
-        val ENEMY_SIZE = 64F
+        const val ENEMY_SIZE = 64F
     }
 }

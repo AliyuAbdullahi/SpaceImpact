@@ -95,9 +95,49 @@ class GameViewModel @Inject constructor() : ViewModel() {
                     delay(FRAME_PER_SECOND_IN_MILLISECONDS)
                     updateEnemiesAndBullets()
                     updateDirection()
+                    checkCollision()
                     refreshGameRunner()
                 }
             }
+        }
+    }
+
+    private fun checkCollision() {
+        val enemies = state.value.enemies
+        val player = state.value.player
+        val enemiesToDelete = mutableListOf<Enemy>()
+        val hasCollision = enemies.any {enemy ->
+            enemy.intersectsWith(player).also {
+                if (it) {
+                    enemiesToDelete.add(enemy)
+                }
+            }
+        }
+
+        var health = player.healthCount
+        if (hasCollision) {
+            health = player.healthCount - 1
+        }
+
+        val bullets = state.value.bullets
+        val bulletsToDelete = mutableListOf<Bullet>()
+        enemies.forEach { enemy ->
+            for (bullet in bullets) {
+                if (enemy.intersectsWith(bullet)) {
+                    enemiesToDelete.add(enemy)
+                    bulletsToDelete.add(bullet)
+                }
+            }
+        }
+
+        val newEnemies = enemies.filter { enemiesToDelete.contains(it).not() }
+        val newBullets = bullets.filter { bulletsToDelete.contains(it).not() }
+        updateState {
+            copy(
+                enemies = newEnemies,
+                bullets = newBullets,
+                player = player.copy(healthCount = health)
+            )
         }
     }
 

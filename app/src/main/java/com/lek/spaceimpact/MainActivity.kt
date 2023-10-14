@@ -62,7 +62,7 @@ class MainActivity : ComponentActivity() {
                             player = state.player,
                             enemies = state.enemies,
                             bullets = state.bullets,
-                            isPaused = state.isRunning.not(),
+                            isPaused = state.isRunning.not() && state.isGameOver.not(),
                             onGameRendered = {
                                 if (it != IntSize(0, 0) && gameStarted.not()) {
                                     viewModel.startGame(

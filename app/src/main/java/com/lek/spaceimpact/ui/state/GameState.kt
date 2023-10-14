@@ -7,6 +7,7 @@ import com.lek.spaceimpact.ui.entities.Player
 
 data class GameState(
     val isRunning: Boolean = false,
+    val isGameOver: Boolean = false,
     val enemies: List<Enemy> = listOf(),
     val bullets: List<Bullet> = listOf(),
     val player: Player = Player(healthCount = 0, xPos = 0F, yPos = 0F, bulletCount = 0),
