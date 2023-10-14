@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.IntSize
 import com.lek.spaceimpact.component.GameView
 import com.lek.spaceimpact.ui.state.DownDirectionClicked
 import com.lek.spaceimpact.ui.state.GamePaused
+import com.lek.spaceimpact.ui.state.GameResumed
 import com.lek.spaceimpact.ui.state.GunFired
 import com.lek.spaceimpact.ui.state.KeyReleased
 import com.lek.spaceimpact.ui.state.LeftDirectionClicked
@@ -61,6 +62,7 @@ class MainActivity : ComponentActivity() {
                             player = state.player,
                             enemies = state.enemies,
                             bullets = state.bullets,
+                            isPaused = state.isRunning.not(),
                             onGameRendered = {
                                 if (it != IntSize(0, 0) && gameStarted.not()) {
                                     viewModel.startGame(
@@ -87,7 +89,11 @@ class MainActivity : ComponentActivity() {
                                 viewModel.onEvent(GunFired)
                             },
                             onKeyReleased = { viewModel.onEvent(KeyReleased) },
-                            onPause = { viewModel.onEvent(GamePaused) }
+                            onPauseGameClicked = { viewModel.onEvent(GamePaused) },
+                            onResumeGameClicked = { viewModel.onEvent(GameResumed) },
+                            onQuitGameClicked = {
+                                // show quit game dialog
+                            }
                         )
                     }
                 }

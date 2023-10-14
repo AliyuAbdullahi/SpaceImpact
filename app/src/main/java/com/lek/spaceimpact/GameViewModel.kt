@@ -95,8 +95,8 @@ class GameViewModel @Inject constructor() : ViewModel() {
                     delay(FRAME_PER_SECOND_IN_MILLISECONDS)
                     updateEnemiesAndBullets()
                     updateDirection()
+                    refreshGameRunner()
                 }
-                republishUpdate()
             }
         }
     }
@@ -131,7 +131,7 @@ class GameViewModel @Inject constructor() : ViewModel() {
         }
     }
 
-    private suspend fun republishUpdate() {
+    private suspend fun refreshGameRunner() {
         gameRunner.emit((gameRunner.value + 1) % 10)
     }
 
@@ -230,6 +230,9 @@ class GameViewModel @Inject constructor() : ViewModel() {
 
             GameResumed -> {
                 updateState { copy(isRunning = true) }
+                viewModelScope.launch {
+                    refreshGameRunner()
+                }
             }
         }
     }
