@@ -19,6 +19,7 @@ fun GameView(
     player: Player,
     enemies: List<Enemy>,
     bullets: List<Bullet>,
+    isPaused: Boolean = false,
     onGameRendered: (IntSize) -> Unit = {},
     onLeftPressed: () -> Unit = {},
     onRightPressed: () -> Unit = {},
@@ -26,7 +27,9 @@ fun GameView(
     onDownPressed: () -> Unit = {},
     onFireBulletPressed: () -> Unit = {},
     onKeyReleased: () -> Unit = {},
-    onPause: () -> Unit = {}
+    onPauseGameClicked: () -> Unit = {},
+    onResumeGameClicked: () -> Unit = {},
+    onQuitGameClicked: () -> Unit = {}
 ) {
     Box(
         modifier = Modifier.background(Color.Black)
@@ -46,7 +49,7 @@ fun GameView(
                 onDownPressed = onDownPressed,
                 onFireBulletPressed = onFireBulletPressed,
                 onKeyReleased = onKeyReleased,
-                onPause = onPause
+                onPause = onPauseGameClicked
             )
         }
         HealthAndBulletBar(
@@ -56,5 +59,11 @@ fun GameView(
                 .background(Color.Cyan),
             bulletCount = player.bulletCount, healthCount = player.healthCount
         )
+        if (isPaused) {
+            GameMenu(
+                onResumeClicked = onResumeGameClicked,
+                onQuitClicked = onQuitGameClicked
+            )
+        }
     }
 }
