@@ -3,10 +3,22 @@ package com.lek.spaceimpact
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.lek.spaceimpact.component.ControllerDirection
 import com.lek.spaceimpact.ui.EnemiesGenerator
+import com.lek.spaceimpact.ui.entities.Bullet
 import com.lek.spaceimpact.ui.entities.Enemy
 import com.lek.spaceimpact.ui.entities.Player
+import com.lek.spaceimpact.ui.state.DownDirectionClicked
+import com.lek.spaceimpact.ui.state.EnemyKilled
+import com.lek.spaceimpact.ui.state.GameEvent
+import com.lek.spaceimpact.ui.state.GamePaused
+import com.lek.spaceimpact.ui.state.GameResumed
 import com.lek.spaceimpact.ui.state.GameState
+import com.lek.spaceimpact.ui.state.GunFired
+import com.lek.spaceimpact.ui.state.KeyReleased
+import com.lek.spaceimpact.ui.state.LeftDirectionClicked
+import com.lek.spaceimpact.ui.state.RightDirectionClicked
+import com.lek.spaceimpact.ui.state.UpDirectionClicked
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.delay
@@ -17,6 +29,12 @@ import kotlinx.coroutines.launch
 // 60 FPS
 private const val FRAME_PER_SECOND_IN_MILLISECONDS = 17L
 
+private const val PLAYER_MOVEMENT = 20
+
+private const val BULLET_SPEED = 15
+
+private const val ENEMY_SPEED = 3
+
 @HiltViewModel
 class GameViewModel @Inject constructor() : ViewModel() {
 
@@ -24,8 +42,6 @@ class GameViewModel @Inject constructor() : ViewModel() {
     val state: StateFlow<GameState> = mutableState
 
     private val enemiesPool = mutableListOf<Enemy>()
-
-    private var gameSpeed = 3
 
     private var currentTime = 0L
 
@@ -45,7 +61,7 @@ class GameViewModel @Inject constructor() : ViewModel() {
         gameScreenWidth: Float,
         gameScreenHeight: Float
     ) {
-        val enemies = EnemiesGenerator.generateEnemies(gameScreenWidth.toInt(), 10, 40)
+        val enemies = EnemiesGenerator.generateEnemies(gameScreenWidth.toInt(), 15, 40)
         enemiesPool.addAll(enemies)
         enemiesPool.forEach {
             Log.d("ENEMY: ", it.toString())
@@ -68,27 +84,152 @@ class GameViewModel @Inject constructor() : ViewModel() {
             )
         }
         currentTime = System.currentTimeMillis()
-        startUpdate()
+        startGameLoop()
     }
 
-    private fun startUpdate() {
+    private fun startGameLoop() {
         viewModelScope.launch {
             gameRunner.collect {
                 // check positions
-                delay(FRAME_PER_SECOND_IN_MILLISECONDS)
-                val isTimePassed = System.currentTimeMillis() - currentTime >= 4000L
-                val update = if (isTimePassed) {
-                    takeEnemies(5)
-                } else {
-                    emptyList()
+                if (state.value.isRunning) {
+                    delay(FRAME_PER_SECOND_IN_MILLISECONDS)
+                    updateEnemiesAndBullets()
+                    updateDirection()
                 }
-                val updatedEnemies = state.value.enemies.toMutableList().apply {
-                    if (update.isNotEmpty()) {
-                        addAll(update)
-                    }
-                }.map { it.copy(yPos = if (it.yPos >= state.value.screenHeight) -Enemy.ENEMY_SIZE else it.yPos + gameSpeed) }
-                updateState { copy(enemies = updatedEnemies) }
-                gameRunner.emit((gameRunner.value + 1) % 10)
+                republishUpdate()
+            }
+        }
+    }
+
+    private fun updateEnemiesAndBullets() {
+        val isTimePassed = System.currentTimeMillis() - currentTime >= 4000L
+        val update = if (isTimePassed) {
+            takeEnemies(5)
+        } else {
+            emptyList()
+        }
+        val updatedEnemies = state.value.enemies.toMutableList().apply {
+            if (update.isNotEmpty()) {
+                addAll(update)
+            }
+        }
+            .map {
+                it.copy(
+                    yPos = if (it.yPos >= state.value.screenHeight) -Enemy.ENEMY_SIZE
+                    else it.yPos + ENEMY_SPEED
+                )
+            }
+
+        val updatedBullets = state.value.bullets.toMutableList().map {
+            it.copy(yPos = it.yPos - BULLET_SPEED, isActive = it.yPos >= 0)
+        }
+
+        updateState {
+            copy(
+                enemies = updatedEnemies,
+                bullets = updatedBullets.filter { it.isActive })
+        }
+    }
+
+    private suspend fun republishUpdate() {
+        gameRunner.emit((gameRunner.value + 1) % 10)
+    }
+
+    private fun updateDirection() {
+        when (state.value.direction) {
+            ControllerDirection.UP -> {
+                val currentPlayer = state.value.player
+                val playerY = (currentPlayer.yPos - PLAYER_MOVEMENT).coerceAtLeast(0F)
+                updateState {
+                    copy(player = player.copy(yPos = playerY))
+                }
+            }
+
+            ControllerDirection.DOWN -> {
+                val currentPlayer = state.value.player
+                val maxHeight = state.value.screenHeight - currentPlayer.height
+                val playerY = (currentPlayer.yPos + PLAYER_MOVEMENT).coerceAtMost(maxHeight)
+                updateState {
+                    copy(player = player.copy(yPos = playerY))
+                }
+            }
+
+            ControllerDirection.LEFT -> {
+                val currentPlayer = state.value.player
+                val playerX = (currentPlayer.xPos - PLAYER_MOVEMENT).coerceAtLeast(0F)
+                updateState {
+                    copy(player = player.copy(xPos = playerX))
+                }
+            }
+
+            ControllerDirection.RIGHT -> {
+                val currentPlayer = state.value.player
+                val maxWidth = state.value.screenWidth - currentPlayer.width
+                val playerX = (currentPlayer.xPos + PLAYER_MOVEMENT).coerceAtMost(maxWidth)
+                updateState {
+                    copy(player = player.copy(xPos = playerX))
+                }
+            }
+
+            ControllerDirection.NONE -> {
+
+            }
+        }
+    }
+
+    private fun withGameRunning(next: () -> Unit) {
+        if (state.value.isRunning) {
+            next()
+        }
+    }
+
+    fun onEvent(event: GameEvent) {
+        when (event) {
+            DownDirectionClicked -> withGameRunning {
+                Log.d("DIRECTION", "DOWN")
+                updateState { copy(direction = ControllerDirection.DOWN) }
+            }
+
+            is EnemyKilled -> {
+
+            }
+
+            LeftDirectionClicked -> withGameRunning {
+                Log.d("DIRECTION", "LEFT")
+                updateState {
+                    copy(direction = ControllerDirection.LEFT)
+                }
+            }
+
+            RightDirectionClicked -> withGameRunning {
+                Log.d("DIRECTION", "RIGHT")
+                updateState { copy(direction = ControllerDirection.RIGHT) }
+            }
+
+            UpDirectionClicked -> withGameRunning {
+                Log.d("DIRECTION", "UP")
+                updateState { copy(direction = ControllerDirection.UP) }
+            }
+
+            GunFired -> withGameRunning {
+                val player = state.value.player
+                val xPos = player.xPos
+                val yPos = player.yPos
+                val bullet = Bullet(xPos + player.width / 2 - Bullet.BULLET_SIZE / 4, yPos)
+                val currentBullets = state.value.bullets.toMutableList().apply { add(bullet) }
+                updateState { copy(bullets = currentBullets) }
+            }
+
+            KeyReleased -> withGameRunning {
+                updateState { copy(direction = ControllerDirection.NONE) }
+            }
+
+            GamePaused -> withGameRunning {
+                updateState { copy(isRunning = false) }
+            }
+
+            GameResumed -> {
+                updateState { copy(isRunning = true) }
             }
         }
     }

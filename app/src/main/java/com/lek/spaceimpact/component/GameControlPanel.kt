@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -31,7 +32,9 @@ fun GameControlPanel(
     onRightPressed: () -> Unit = {},
     onUpPressed: () -> Unit = {},
     onDownPressed: () -> Unit = {},
-    onFireBulletPressed: () -> Unit = {}
+    onFireBulletPressed: () -> Unit = {},
+    onKeyReleased: () -> Unit = {},
+    onPause: () -> Unit = {}
 ) {
     Box(
         modifier =
@@ -42,26 +45,35 @@ fun GameControlPanel(
             .background(PurpleGrey40)
             .padding(top = 20.dp)
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 60.dp, start = 40.dp, end = 40.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            GameControllerDirection(
-                onLeftPressed = onLeftPressed,
-                onRightPressed = onRightPressed,
-                onUpPressed = onUpPressed,
-                onDownPressed = onDownPressed
-            )
-            Image(
+        Box(modifier = Modifier.fillMaxWidth()) {
+            Row(
                 modifier = Modifier
-                    .size(80.dp)
-                    .clickable { onFireBulletPressed() },
-                painter = painterResource(id = R.drawable.bullet_trigger),
-                contentDescription = ""
-            )
+                    .fillMaxWidth()
+                    .padding(bottom = 60.dp, start = 40.dp, end = 40.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                GameControllerDirection(
+                    onLeftPressed = onLeftPressed,
+                    onRightPressed = onRightPressed,
+                    onUpPressed = onUpPressed,
+                    onDownPressed = onDownPressed,
+                    onKeyReleased = onKeyReleased
+                )
+
+                Image(
+                    modifier = Modifier
+                        .size(80.dp)
+                        .clickable { onFireBulletPressed() },
+                    painter = painterResource(id = R.drawable.bullet_trigger),
+                    contentDescription = ""
+                )
+            }
+            Box(modifier = Modifier.fillMaxHeight().fillMaxWidth(), contentAlignment = Alignment.BottomCenter) {
+                PauseButton(modifier = Modifier.padding(start = 60.dp, bottom = 8.dp)) {
+                    onPause()
+                }
+            }
         }
     }
 }

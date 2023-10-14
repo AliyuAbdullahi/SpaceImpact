@@ -24,7 +24,9 @@ fun GameView(
     onRightPressed: () -> Unit = {},
     onUpPressed: () -> Unit = {},
     onDownPressed: () -> Unit = {},
-    onFireBulletPressed: () -> Unit = {}
+    onFireBulletPressed: () -> Unit = {},
+    onKeyReleased: () -> Unit = {},
+    onPause: () -> Unit = {}
 ) {
     Box(
         modifier = Modifier.background(Color.Black)
@@ -37,7 +39,15 @@ fun GameView(
                 bullets = bullets,
                 onGameRendered = onGameRendered
             )
-            GameControlPanel()
+            GameControlPanel(
+                onLeftPressed = onLeftPressed,
+                onRightPressed = onRightPressed,
+                onUpPressed = onUpPressed,
+                onDownPressed = onDownPressed,
+                onFireBulletPressed = onFireBulletPressed,
+                onKeyReleased = onKeyReleased,
+                onPause = onPause
+            )
         }
         HealthAndBulletBar(
             modifier = Modifier

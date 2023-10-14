@@ -7,9 +7,10 @@ import androidx.compose.ui.unit.IntSize
 import com.lek.spaceimpact.R
 import java.util.UUID
 
-class Bullet(
+data class Bullet(
     private val xPos: Float,
-    private val yPos: Float
+    val yPos: Float,
+    val isActive: Boolean = true
 ) : GameEntity(
     UUID.randomUUID().toString(), xPos, yPos, BULLET_SIZE, BULLET_SIZE, EntityType.BULLET
 ) {
@@ -31,6 +32,6 @@ class Bullet(
     override val resource: Int = R.drawable.bullet_icon
 
     companion object {
-        val BULLET_SIZE = 40F
+        const val BULLET_SIZE = 40F
     }
 }
