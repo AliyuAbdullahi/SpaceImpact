@@ -7,9 +7,11 @@ import com.lek.spaceimpact.component.ControllerDirection
 import com.lek.spaceimpact.ui.EnemiesGenerator
 import com.lek.spaceimpact.ui.entities.Bullet
 import com.lek.spaceimpact.ui.entities.Enemy
+import com.lek.spaceimpact.ui.entities.Explosion
 import com.lek.spaceimpact.ui.entities.Player
 import com.lek.spaceimpact.ui.state.DownDirectionClicked
 import com.lek.spaceimpact.ui.state.EnemyKilled
+import com.lek.spaceimpact.ui.state.ExplosionRendered
 import com.lek.spaceimpact.ui.state.GameEvent
 import com.lek.spaceimpact.ui.state.GamePaused
 import com.lek.spaceimpact.ui.state.GameResumed
@@ -106,7 +108,7 @@ class GameViewModel @Inject constructor() : ViewModel() {
         val enemies = state.value.enemies
         val player = state.value.player
         val enemiesToDelete = mutableListOf<Enemy>()
-        val hasCollision = enemies.any {enemy ->
+        val hasCollision = enemies.any { enemy ->
             enemy.intersectsWith(player).also {
                 if (it) {
                     enemiesToDelete.add(enemy)
@@ -130,13 +132,21 @@ class GameViewModel @Inject constructor() : ViewModel() {
             }
         }
 
+        val explosions = enemiesToDelete.map {
+            Explosion(
+                it.xPos,
+                it.yPos
+            )
+        }
+
         val newEnemies = enemies.filter { enemiesToDelete.contains(it).not() }
         val newBullets = bullets.filter { bulletsToDelete.contains(it).not() }
         updateState {
             copy(
                 enemies = newEnemies,
                 bullets = newBullets,
-                player = player.copy(healthCount = health)
+                player = player.copy(healthCount = health),
+                explosions = explosions
             )
         }
     }
@@ -272,6 +282,15 @@ class GameViewModel @Inject constructor() : ViewModel() {
                 updateState { copy(isRunning = true) }
                 viewModelScope.launch {
                     refreshGameRunner()
+                }
+            }
+
+            is ExplosionRendered -> {
+                val stateValue = state.value
+                val currentExplosion =
+                    stateValue.explosions.toMutableList().apply { remove(event.explosion) }
+                updateState {
+                    copy(explosions = currentExplosion)
                 }
             }
         }
