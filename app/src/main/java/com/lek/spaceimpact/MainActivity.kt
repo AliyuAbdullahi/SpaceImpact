@@ -17,7 +17,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.IntSize
-import com.lek.spaceimpact.component.GameView
+import com.lek.spaceimpact.ui.component.GameView
 import com.lek.spaceimpact.ui.state.DownDirectionClicked
 import com.lek.spaceimpact.ui.state.ExplosionRendered
 import com.lek.spaceimpact.ui.state.GamePaused

@@ -1,6 +1,6 @@
 package com.lek.spaceimpact.ui.state
 
-import com.lek.spaceimpact.component.ControllerDirection
+import com.lek.spaceimpact.ui.component.ControllerDirection
 import com.lek.spaceimpact.ui.entities.Bullet
 import com.lek.spaceimpact.ui.entities.Enemy
 import com.lek.spaceimpact.ui.entities.Explosion
