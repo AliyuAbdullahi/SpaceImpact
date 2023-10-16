@@ -3,8 +3,11 @@ package com.lek.spaceimpact
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.lek.spaceimpact.component.ControllerDirection
+import com.lek.spaceimpact.domain.ISoundService
+import com.lek.spaceimpact.domain.LongMusic
+import com.lek.spaceimpact.domain.SoundClip
 import com.lek.spaceimpact.ui.EnemiesGenerator
+import com.lek.spaceimpact.ui.component.ControllerDirection
 import com.lek.spaceimpact.ui.entities.Bullet
 import com.lek.spaceimpact.ui.entities.Enemy
 import com.lek.spaceimpact.ui.entities.Explosion
@@ -38,7 +41,9 @@ private const val BULLET_SPEED = 15
 private const val ENEMY_SPEED = 3
 
 @HiltViewModel
-class GameViewModel @Inject constructor() : ViewModel() {
+class GameViewModel @Inject constructor(
+    private val soundService: ISoundService
+) : ViewModel() {
 
     private var mutableState: MutableStateFlow<GameState> = MutableStateFlow(GameState.EMPTY)
     val state: StateFlow<GameState> = mutableState
@@ -63,6 +68,7 @@ class GameViewModel @Inject constructor() : ViewModel() {
         gameScreenWidth: Float,
         gameScreenHeight: Float
     ) {
+        soundService.init()
         val enemies = EnemiesGenerator.generateEnemies(gameScreenWidth.toInt(), 15, 40)
         enemiesPool.addAll(enemies)
         enemiesPool.forEach {
@@ -87,6 +93,7 @@ class GameViewModel @Inject constructor() : ViewModel() {
         }
         currentTime = System.currentTimeMillis()
         startGameLoop()
+        soundService.playLongMedia(LongMusic.LEVEL_ONE)
     }
 
     private fun startGameLoop() {
@@ -128,6 +135,7 @@ class GameViewModel @Inject constructor() : ViewModel() {
                 if (enemy.intersectsWith(bullet)) {
                     enemiesToDelete.add(enemy)
                     bulletsToDelete.add(bullet)
+                    soundService.playShortMedia(SoundClip.ENEMY_JET_FIRED)
                 }
             }
         }
@@ -262,6 +270,7 @@ class GameViewModel @Inject constructor() : ViewModel() {
             }
 
             GunFired -> withGameRunning {
+                soundService.playShortMedia(SoundClip.GUN_FIRE)
                 val player = state.value.player
                 val xPos = player.xPos
                 val yPos = player.yPos
@@ -275,10 +284,12 @@ class GameViewModel @Inject constructor() : ViewModel() {
             }
 
             GamePaused -> withGameRunning {
+                soundService.playLongMedia(LongMusic.MENU)
                 updateState { copy(isRunning = false) }
             }
 
             GameResumed -> {
+                soundService.playLongMedia(LongMusic.LEVEL_ONE)
                 updateState { copy(isRunning = true) }
                 viewModelScope.launch {
                     refreshGameRunner()
