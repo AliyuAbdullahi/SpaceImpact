@@ -23,6 +23,17 @@ import com.lek.spaceimpact.ui.entities.Explosion
 import com.lek.spaceimpact.ui.entities.Player
 import com.lek.spaceimpact.ui.getBitmapDataList
 
+data class GameDialogData(
+    val message: String,
+    val okClicked: () -> Unit,
+    val cancelClicked: () -> Unit
+)
+
+data class SuccessDialog(
+    val message: String,
+    val actions: List<DialogAction>
+)
+
 @Composable
 fun InGameDisplay(
     modifier: Modifier = Modifier,

@@ -3,4 +3,9 @@
     <string name="pause">Pause</string>
     <string name="resume">Resume</string>
     <string name="quit_game">Quit game</string>
+    <string name="cancel">Cancel</string>
+    <string name="ok">Ok</string>
+    <string name="restart">Restart</string>
+    <string name="home">Home</string>
+    <string name="quit_game_question">Quit Game?</string>
 </resources>

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -16,23 +17,49 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntSize
+import com.lek.spaceimpact.ui.component.DialogAction
+import com.lek.spaceimpact.ui.component.GameDialogData
 import com.lek.spaceimpact.ui.component.GameView
+import com.lek.spaceimpact.ui.component.SuccessDialog
+import com.lek.spaceimpact.ui.state.DialogCancelled
 import com.lek.spaceimpact.ui.state.DownDirectionClicked
 import com.lek.spaceimpact.ui.state.ExplosionRendered
 import com.lek.spaceimpact.ui.state.GamePaused
 import com.lek.spaceimpact.ui.state.GameResumed
+import com.lek.spaceimpact.ui.state.GameState
 import com.lek.spaceimpact.ui.state.GunFired
 import com.lek.spaceimpact.ui.state.KeyReleased
 import com.lek.spaceimpact.ui.state.LeftDirectionClicked
+import com.lek.spaceimpact.ui.state.OnQuitGameRequested
+import com.lek.spaceimpact.ui.state.RestartGame
 import com.lek.spaceimpact.ui.state.RightDirectionClicked
+import com.lek.spaceimpact.ui.state.SystemPaused
+import com.lek.spaceimpact.ui.state.SystemResumed
 import com.lek.spaceimpact.ui.state.UpDirectionClicked
+import com.lek.spaceimpact.ui.state.ViewDestroyed
 import com.lek.spaceimpact.ui.theme.SpaceImpactTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val viewModel: GameViewModel by viewModels()
+
+    override fun onPause() {
+        super.onPause()
+        viewModel.onEvent(SystemPaused)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.onEvent(SystemResumed)
+    }
+
+    override fun onDestroy() {
+        viewModel.onEvent(ViewDestroyed)
+        super.onDestroy()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,6 +92,8 @@ class MainActivity : ComponentActivity() {
                             bullets = state.bullets,
                             explosions = state.explosions,
                             isPaused = state.isRunning.not() && state.isGameOver.not(),
+                            successDialog = getSuccessDialog(state),
+                            gameDialog = getPauseDialog(state),
                             onGameRendered = {
                                 if (it != IntSize(0, 0) && gameStarted.not()) {
                                     viewModel.startGame(
@@ -94,7 +123,7 @@ class MainActivity : ComponentActivity() {
                             onPauseGameClicked = { viewModel.onEvent(GamePaused) },
                             onResumeGameClicked = { viewModel.onEvent(GameResumed) },
                             onQuitGameClicked = {
-                                // show quit game dialog
+                                viewModel.onEvent(OnQuitGameRequested)
                             },
                             onExplosionRendered = { viewModel.onEvent(ExplosionRendered(it)) }
                         )
@@ -103,4 +132,36 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+    @Composable
+    fun getPauseDialog(state: GameState): GameDialogData? {
+       return state.gameDialog?.let {
+            GameDialogData(
+                message = stringResource(R.string.quit_game_question),
+                okClicked = {
+                    // return home
+                },
+                cancelClicked = {
+                    viewModel.onEvent(DialogCancelled)
+                }
+            )
+        }
+    }
+
+    @Composable
+    fun getSuccessDialog(state: GameState) =
+        if (state.isRunning && state.enemies.isEmpty()) {
+            SuccessDialog(
+                message = "You have won", actions = listOf(
+                    DialogAction(stringResource(R.string.restart), action = {
+                        viewModel.onEvent(RestartGame)
+                    }),
+                    DialogAction(stringResource(R.string.home), action = {
+                        // quit to previous activity
+                    }),
+                )
+            )
+        } else {
+            null
+        }
 }

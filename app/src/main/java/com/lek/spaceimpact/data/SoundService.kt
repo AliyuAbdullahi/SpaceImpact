@@ -47,4 +47,23 @@ class SoundService(private val context: Context) : ISoundService {
             }
         }
     }
+
+    override fun pause() {
+        if (mediaPlayer.isPlaying) {
+            mediaPlayer.pause()
+        }
+    }
+
+    override fun resume() {
+        try {
+            mediaPlayer.start()
+        }catch (error: Exception) {
+            Log.e("ERROR", error.stackTraceToString())
+        }
+    }
+
+    override fun release() {
+        mediaPlayer.release()
+        soundPool.release()
+    }
 }
