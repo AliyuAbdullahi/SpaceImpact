@@ -22,6 +22,8 @@ fun GameView(
     bullets: List<Bullet>,
     explosions: List<Explosion>,
     isPaused: Boolean = false,
+    gameDialog: GameDialogData? = null,
+    successDialog: SuccessDialog? = null,
     onGameRendered: (IntSize) -> Unit = {},
     onLeftPressed: () -> Unit = {},
     onRightPressed: () -> Unit = {},
@@ -70,5 +72,18 @@ fun GameView(
                 onQuitClicked = onQuitGameClicked
             )
         }
+
+        gameDialog?.let {
+            GameDialog(
+                message = it.message,
+                onOkayClicked = it.okClicked,
+                onCancelClicked = it.cancelClicked
+            )
+        }
+
+        successDialog?.let {
+            GameDialog(message = it.message, dialogActions = it.actions, isOkayCancel = false)
+        }
     }
 }
+

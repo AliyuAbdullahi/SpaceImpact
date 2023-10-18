@@ -11,6 +11,13 @@ val DS_MYSTICORA = FontFamily(
     Font(R.font.ds_mysticora_d9dz, FontWeight.SemiBold)
 )
 
+val OPEN_SANS = FontFamily(
+    Font(R.font.open_sans_regular, FontWeight.Normal),
+    Font(R.font.open_sans_bold, FontWeight.Bold),
+    Font(R.font.open_sans_semibold, FontWeight.SemiBold),
+    Font(R.font.open_sans_light, FontWeight.Light)
+)
+
 val APE_MOUNT = FontFamily(
     Font(R.font.ape_mount, FontWeight.Normal),
     Font(R.font.ape_mount, FontWeight.Bold),

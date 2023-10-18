@@ -12,6 +12,7 @@ import com.lek.spaceimpact.ui.entities.Bullet
 import com.lek.spaceimpact.ui.entities.Enemy
 import com.lek.spaceimpact.ui.entities.Explosion
 import com.lek.spaceimpact.ui.entities.Player
+import com.lek.spaceimpact.ui.state.DialogCancelled
 import com.lek.spaceimpact.ui.state.DownDirectionClicked
 import com.lek.spaceimpact.ui.state.EnemyKilled
 import com.lek.spaceimpact.ui.state.ExplosionRendered
@@ -22,8 +23,13 @@ import com.lek.spaceimpact.ui.state.GameState
 import com.lek.spaceimpact.ui.state.GunFired
 import com.lek.spaceimpact.ui.state.KeyReleased
 import com.lek.spaceimpact.ui.state.LeftDirectionClicked
+import com.lek.spaceimpact.ui.state.OnQuitGameRequested
+import com.lek.spaceimpact.ui.state.RestartGame
 import com.lek.spaceimpact.ui.state.RightDirectionClicked
+import com.lek.spaceimpact.ui.state.SystemPaused
+import com.lek.spaceimpact.ui.state.SystemResumed
 import com.lek.spaceimpact.ui.state.UpDirectionClicked
+import com.lek.spaceimpact.ui.state.ViewDestroyed
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.delay
@@ -170,8 +176,7 @@ class GameViewModel @Inject constructor(
             if (update.isNotEmpty()) {
                 addAll(update)
             }
-        }
-            .map {
+        }.map {
                 it.copy(
                     yPos = if (it.yPos >= state.value.screenHeight) -Enemy.ENEMY_SIZE
                     else it.yPos + ENEMY_SPEED
@@ -229,9 +234,7 @@ class GameViewModel @Inject constructor(
                 }
             }
 
-            ControllerDirection.NONE -> {
-
-            }
+            ControllerDirection.NONE -> {}
         }
     }
 
@@ -303,6 +306,30 @@ class GameViewModel @Inject constructor(
                 updateState {
                     copy(explosions = currentExplosion)
                 }
+            }
+
+            DialogCancelled -> {
+                updateState { copy(successDialog = null, gameDialog = null) }
+            }
+            RestartGame -> {
+                // restart game
+            }
+
+            OnQuitGameRequested -> {
+                updateState {
+                    copy(gameDialog = Unit)
+                }
+            }
+
+            SystemPaused -> {
+                soundService.pause()
+                updateState { copy(isRunning = false) }
+            }
+            SystemResumed -> {
+                soundService.resume()
+            }
+            ViewDestroyed -> {
+                soundService.release()
             }
         }
     }

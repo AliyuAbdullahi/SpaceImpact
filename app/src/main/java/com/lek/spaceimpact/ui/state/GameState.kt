@@ -1,6 +1,8 @@
 package com.lek.spaceimpact.ui.state
 
 import com.lek.spaceimpact.ui.component.ControllerDirection
+import com.lek.spaceimpact.ui.component.GameDialogData
+import com.lek.spaceimpact.ui.component.SuccessDialog
 import com.lek.spaceimpact.ui.entities.Bullet
 import com.lek.spaceimpact.ui.entities.Enemy
 import com.lek.spaceimpact.ui.entities.Explosion
@@ -15,7 +17,9 @@ data class GameState(
     val player: Player = Player(healthCount = 0, xPos = 0F, yPos = 0F, bulletCount = 0),
     val screenWidth: Float = 0F,
     val screenHeight: Float = 0F,
-    val direction: ControllerDirection = ControllerDirection.NONE
+    val direction: ControllerDirection = ControllerDirection.NONE,
+    val gameDialog: Unit? = null,
+    val successDialog: Unit? = null,
 ) {
     companion object {
         val EMPTY = GameState()
@@ -43,3 +47,15 @@ object GameResumed : GameEvent
 data class EnemyKilled(val enemy: Enemy) : GameEvent
 
 data class ExplosionRendered(val explosion: Explosion): GameEvent
+
+object DialogCancelled: GameEvent
+
+object RestartGame: GameEvent
+
+object OnQuitGameRequested: GameEvent
+
+object SystemPaused: GameEvent
+
+object SystemResumed: GameEvent
+
+object ViewDestroyed: GameEvent
