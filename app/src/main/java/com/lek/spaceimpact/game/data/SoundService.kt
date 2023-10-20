@@ -13,7 +13,7 @@ class SoundService(private val context: Context) : ISoundService {
 
     private lateinit var soundPool: SoundPool
 
-    private var mediaPlayer: MediaPlayer = MediaPlayer()
+    private var mediaPlayer: MediaPlayer? = MediaPlayer()
 
     private val soundIds = mutableMapOf<SoundClip, Int>()
 
@@ -29,12 +29,12 @@ class SoundService(private val context: Context) : ISoundService {
 
     override fun playLongMedia(longMusic: LongMusic) {
         try {
-            mediaPlayer.stop()
+            mediaPlayer?.stop()
             mediaPlayer = MediaPlayer.create(context, longMusic.resource)
-            mediaPlayer.start()
+            mediaPlayer?.start()
         } catch (error: Exception) {
             mediaPlayer = MediaPlayer.create(context, longMusic.resource)
-            mediaPlayer.start()
+            mediaPlayer?.start()
             Log.e("ERROR", error.stackTraceToString())
         }
     }
@@ -50,12 +50,12 @@ class SoundService(private val context: Context) : ISoundService {
     }
 
     override fun stop() {
-//        mediaPlayer.stop()
+        mediaPlayer?.stop()
     }
 
     override fun pause() {
         try {
-            mediaPlayer.pause()
+            mediaPlayer?.pause()
         } catch (error: Exception) {
             Log.e("ERROR", error.stackTraceToString())
         }
@@ -63,7 +63,7 @@ class SoundService(private val context: Context) : ISoundService {
 
     override fun resume() {
         try {
-            mediaPlayer.start()
+            mediaPlayer?.start()
         } catch (error: Exception) {
             Log.e("ERROR", error.stackTraceToString())
         }
@@ -71,7 +71,9 @@ class SoundService(private val context: Context) : ISoundService {
 
     override fun release() {
         try {
-            mediaPlayer.release()
+            mediaPlayer?.stop()
+            mediaPlayer?.release()
+            mediaPlayer = null
         }catch (error: Exception) {
             Log.e("ERROR", error.stackTraceToString())
         }

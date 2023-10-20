@@ -9,4 +9,5 @@
     <string name="home">Home</string>
     <string name="quit_game_question">Quit Game?</string>
     <string name="you_have_won">You have won</string>
+    <string name="space_impact">Space Impact</string>
 </resources>
