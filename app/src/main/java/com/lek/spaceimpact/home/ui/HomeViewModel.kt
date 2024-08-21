@@ -25,12 +25,14 @@ class HomeViewModel @Inject constructor(
     override fun handleEvent(event: HomeEvent) {
         when (event) {
             ShowAbout -> {
-//                soundService.playShortMedia(SoundClip.OPEN_MENU)
+                soundService.playShortMedia(SoundClip.OPEN_MENU)
+                soundService.playLongMedia(LongMusic.ABOUT_GAME)
                 updateState { copy(destination = Destination.ABOUT) }
             }
 
             ShowHome -> updateState {
                 soundService.playShortMedia(SoundClip.OPEN_MENU)
+                soundService.playLongMedia(LongMusic.HOME)
                 copy(destination = Destination.HOME)
             }
 
@@ -41,6 +43,7 @@ class HomeViewModel @Inject constructor(
 
             SystemDestroyed -> {
                 soundService.release()
+                soundService.stop()
             }
 
             SystemPaused -> {

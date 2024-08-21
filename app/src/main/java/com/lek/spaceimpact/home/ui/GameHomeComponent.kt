@@ -1,5 +1,7 @@
 package com.lek.spaceimpact.home.ui
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -30,12 +32,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.lek.spaceimpact.R
+import com.lek.spaceimpact.home.ui.about.components.AboutGame
 import com.lek.spaceimpact.home.ui.model.Destination
 import com.lek.spaceimpact.ui.theme.APE_MOUNT
 import com.lek.spaceimpact.ui.theme.MenuBlue
 import com.lek.spaceimpact.ui.theme.MenuBlueLight
 import com.lek.spaceimpact.ui.theme.SpaceImpactTheme
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun GameHomeComponent(
     destination: Destination,
@@ -43,7 +47,27 @@ fun GameHomeComponent(
     onNavigateToAboutClicked: () -> Unit = {},
     onNavigateToHomeClicked: () -> Unit = {}
 ) {
+    AnimatedContent(targetState = destination, label = "") { theDestination ->
+        when (theDestination) {
+            Destination.HOME -> {
+                HomeScreen(
+                    onNewGameClicked = onNewGameClicked,
+                    onNavigateToAboutClicked = onNavigateToAboutClicked
+                )
+            }
 
+            Destination.ABOUT -> {
+                AboutGame(onBackClicked = { onNavigateToHomeClicked() })
+            }
+        }
+    }
+}
+
+@Composable
+private fun HomeScreen(
+    onNewGameClicked: () -> Unit,
+    onNavigateToAboutClicked: () -> Unit
+) {
     var isVisible by remember {
         mutableStateOf(false)
     }
