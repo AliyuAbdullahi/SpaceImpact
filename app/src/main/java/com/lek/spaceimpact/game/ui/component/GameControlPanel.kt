@@ -38,7 +38,7 @@ fun GameControlPanel(
 ) {
     Box(
         modifier =
-        Modifier
+        modifier
             .fillMaxWidth()
             .height(160.dp)
             .clip(RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp))

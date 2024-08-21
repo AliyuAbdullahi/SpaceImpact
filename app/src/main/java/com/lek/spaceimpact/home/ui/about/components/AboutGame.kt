@@ -25,6 +25,7 @@ import com.lek.spaceimpact.R
 import com.lek.spaceimpact.ui.theme.APE_MOUNT
 import com.lek.spaceimpact.ui.theme.GreyPurple
 import com.lek.spaceimpact.ui.theme.MenuBlueLight
+import com.lek.spaceimpact.ui.theme.OPEN_SANS
 import com.lek.spaceimpact.ui.theme.Purple80
 import com.lek.spaceimpact.ui.theme.SpaceImpactTheme
 
@@ -56,7 +57,8 @@ fun AboutGame(
         Text(
             text = "Space Impact is a simple space shooter game with basic direction controls and a shooting button. \nThe player has three lives on which it can survive on during the game. \nThe live will reduce whenever there is an impact with the enemy.",
             color = Color.White,
-            fontSize = 18.sp
+            fontSize = 18.sp,
+            fontFamily = OPEN_SANS
         )
         Spacer(modifier = Modifier.height(20.dp))
         Text(text = "CREDIT", color = MenuBlueLight, fontSize = 22.sp)
@@ -64,7 +66,8 @@ fun AboutGame(
         Text(
             text = "This game gives a lot of thanks to these sources from where it obtained some of the assets used in the development of this game. ",
             color = Color.White,
-            fontSize = 18.sp
+            fontSize = 18.sp,
+            fontFamily = OPEN_SANS
         )
         Spacer(modifier = Modifier.height(20.dp))
         for (credit in credits) {
@@ -75,9 +78,10 @@ fun AboutGame(
         Spacer(modifier = Modifier.height(20.dp))
 
         Text(
-            text = "© 2023",
+            text = "© 2024",
             modifier = Modifier.align(Alignment.CenterHorizontally),
-            color = MenuBlueLight
+            color = MenuBlueLight,
+            fontFamily = OPEN_SANS
         )
     }
 }
@@ -107,7 +111,8 @@ private fun Credit(url: String, label: String) {
     Text(
         text = label,
         modifier = Modifier.clickable { uriHandler.openUri(url) },
-        color = Purple80
+        color = Purple80,
+        fontFamily = OPEN_SANS
     )
 }
 
